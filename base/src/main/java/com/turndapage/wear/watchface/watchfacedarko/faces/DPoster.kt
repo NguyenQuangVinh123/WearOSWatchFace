@@ -53,7 +53,6 @@ class DPoster : AbstractKotlinWatchFace() {
                 heightRatio = 0.25f
                 xPos = 0.9f
                 yPos = 0.5f
-                defaultProviderService = DaysToEndProviderService::class.java
                 titleTypeface = R.font.donnie_darko
             }
             watchFaceComplication2 {
@@ -61,7 +60,6 @@ class DPoster : AbstractKotlinWatchFace() {
                 heightRatio = 0.25f
                 xPos = 0.1f
                 yPos = 0.5f
-                defaultProviderService = QuoteProviderService::class.java
                 titleTypeface = R.font.donnie_darko
             }
             watchFaceStyle{

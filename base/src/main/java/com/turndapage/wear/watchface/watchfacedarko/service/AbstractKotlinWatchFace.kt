@@ -24,6 +24,7 @@ import android.os.Handler
 import android.os.Message
 import android.support.v4.content.res.ResourcesCompat
 import android.support.wearable.complications.ComplicationData
+import android.support.wearable.complications.SystemProviders.DAY_OF_WEEK
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
@@ -39,10 +40,11 @@ import com.turndapage.wear.watchface.watchfacedarko.model.EMPTY_IMAGE_RESOURCE
 import org.w3c.dom.Text
 
 import java.lang.ref.WeakReference
+import java.time.DayOfWeek
 import java.util.Calendar
+import java.util.Calendar.DAY_OF_MONTH
 import java.util.TimeZone
 import kotlin.math.roundToInt
-
 /**
  * Updates rate in milliseconds for interactive mode. We update once a second to advance the
  * second hand.
@@ -86,6 +88,8 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
     override fun onCreateEngine(): Engine {
         return Engine()
     }
+
+
 
     private class EngineHandler(reference: AbstractKotlinWatchFace.Engine) : Handler() {
         private val weakReference: WeakReference<AbstractKotlinWatchFace.Engine> =
@@ -177,7 +181,7 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
 
         override fun onCreate(holder: SurfaceHolder) {
             super.onCreate(holder)
-
+            
             analogWatchFaceStyle = getWatchFaceStyle()
 
             setWatchFaceStyle(
@@ -283,9 +287,17 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
             complicationDrawableSparseArray.put(complicationId3, complicationDrawable3)
 
             setActiveComplications(complicationId1, complicationId2, complicationId3)
-
-
+//            val dateComponent = ComponentName(
+//                    "com.google.android.wearable.app",
+//                    "com.google.android.clockwork.home.complications.providers.DayOfMonthProviderService"
+//            )
+//            setDefaultComplicationProvider(DAY_OF_WEEK, dateComponent, ComplicationData.TYPE_RANGED_VALUE)
+            val dateComponent = ComponentName(
+                    "com.google.android.wearable.app",
+                    "com.google.android.clockwork.home.complications.providers.DAY_OF_WEEK"
+            )
             if(analogWatchFaceStyle.watchFaceComplication1.defaultProvider != null) {
+
                 val defaultProviderService = ComponentName(applicationContext, analogWatchFaceStyle.watchFaceComplication1.defaultProvider!!)
                 if(analogWatchFaceStyle.watchFaceComplication1.supportedTypes.contains(ComplicationData.TYPE_LONG_TEXT)) {
                     setDefaultComplicationProvider(complicationId1, defaultProviderService, ComplicationData.TYPE_LONG_TEXT)
@@ -539,12 +551,12 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
-
             /*
              * Find the coordinates of the center point on the screen, and ignore the window
              * insets, so that, on round watches with a "chin", the watch face is centered on the
              * entire screen, not just the usable portion.
              */
+
             centerX = width / 2f
             centerY = height / 2f
 
@@ -664,6 +676,20 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
                 hourHandHeight = dHeight.times(scale)
                 hourOffset = hourHandHeight * offset
             }
+            if(analogWatchFaceStyle.watchFaceComplication1.defaultProvider == null) {
+                val defaultProviderService = ComponentName("com.google.android.wearable.app",
+                        "com.google.android.clockwork.home.complications.providers.DayOfMonthProviderService"
+                )
+                setDefaultComplicationProvider(complicationId1, defaultProviderService, ComplicationData.TYPE_SHORT_TEXT)
+
+            }
+            if(analogWatchFaceStyle.watchFaceComplication2.defaultProvider == null) {
+                val defaultProviderService1 = ComponentName("com.google.android.wearable.app",
+                        "com.google.android.clockwork.home.complications.providers.BatteryProviderService"
+                )
+                setDefaultComplicationProvider(complicationId2, defaultProviderService1, ComplicationData.TYPE_SHORT_TEXT)
+            }
+
 
             if(analogWatchFaceStyle.watchFaceMinuteHand.drawable != 0) {
                 val offset = analogWatchFaceStyle.watchFaceMinuteHand.offset
@@ -683,6 +709,10 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
                 minuteOffset = minuteHandHeight * offset
             }
         }
+
+
+
+
 
         private fun initGrayBackgroundBitmap() {
             grayBackgroundBitmap = Bitmap.createBitmap(
